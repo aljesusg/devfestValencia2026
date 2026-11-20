@@ -68,8 +68,8 @@ def main():
                     "command": binaries["02-tools-schemas"],
                     "env": {"SCHEDULE_PATH": env["SCHEDULE_PATH"]},
                 },
-                "03 — HTTP transport · Agenda analytics": {"url": url + "/mcp"},
-                "04 — Connect a client · Guided investigation": {"url": url + "/mcp"},
+                "03 — HTTP transport · Agenda analytics": {"type": "streamable-http", "url": url + "/mcp"},
+                "04 — Connect a client · Guided investigation": {"type": "streamable-http", "url": url + "/mcp"},
             }
             config = Path(temp) / "inspector.json"
             config.write_text(json.dumps({"mcpServers": profiles}, indent=2))
