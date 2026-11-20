@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Build Your First MCP Server — DevFest Valencia 2026</title>
+  <meta name="description" content="Hands-on workshop: build your first Model Context Protocol server in Go." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
+  <link rel="stylesheet" href="css/theme.css?v=2" />
+</head>
+<body>
+  <div class="reveal bg-glow">
+    <div class="slides">
+
+      <section class="center-slide">
+        <p class="eyebrow">DevFest Valencia 2026</p>
+        <h1 class="hero-title">Build Your First<br />MCP Server</h1>
+        <p class="byline">Alberto Gutiérrez Juanes · @aljesusg</p>
+      </section>
+
+      <section>
+        <p class="eyebrow">whoami</p>
+        <h2>About the speaker</h2>
+        <div class="split-media">
+          <div class="copy">
+            <div class="card">
+              <h3>Alberto Gutiérrez</h3>
+              <p>Principal Software Engineer at Red Hat · Open Source mode: ON</p>
+            </div>
+            <div class="card" style="margin-top:0.8em">
+              <h3>Find me</h3>
+              <p>
+                GitHub <code>aljesusg</code><br />
+                X / LinkedIn · GDG &amp; GDE
+              </p>
+            </div>
+          </div>
+          <img class="whoami-photo" src="assets/speaker.jpg" alt="Alberto Gutiérrez speaking on stage" />
+        </div>
+      </section>
+
+      <section class="agenda">
+        <p class="eyebrow">~75 minutes</p>
+        <h2>Agenda</h2>
+        <ol style="font-size:0.78em">
+          <li><strong>Intro</strong> — LLM context gap → MCP (Host / Client / Server, tools, transports)</li>
+          <li><strong>Setup</strong> — clone repo, confirm Go</li>
+          <li><strong>Live demo</strong> — <code>demo-example</code> schedule tool, tokens &amp; evals</li>
+          <li><strong>Step 01</strong> — Hello MCP over stdio</li>
+          <li><strong>Step 02</strong> — Tools &amp; schemas</li>
+          <li><strong>Step 03</strong> — Streamable HTTP</li>
+          <li><strong>Step 04</strong> — Connect Cursor / Gemini</li>
+          <li><strong>Home</strong> — Bonus step 05</li>
+        </ol>
+      </section>
+
+      <section>
+        <p class="eyebrow">links</p>
+        <h2>Workshop materials</h2>
+        <div class="split-media">
+          <ul>
+            <li>Repo: <a href="https://github.com/aljesusg/devfestValencia2026">github.com/aljesusg/devfestValencia2026</a></li>
+            <li>These slides: GitHub Pages in the same repo</li>
+            <li>Spec: <a href="https://modelcontextprotocol.io/">modelcontextprotocol.io</a></li>
+            <li>Core SDK: <a href="https://github.com/modelcontextprotocol/go-sdk">modelcontextprotocol/go-sdk</a></li>
+            <li>Inspiration: <a href="https://github.com/containers/kubernetes-mcp-server">kubernetes-mcp-server</a> (methodology, not a clone)</li>
+          </ul>
+          <div class="qr-block">
+            <img class="qr-code" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXIAAAFyAQAAAADAX2ykAAAC2UlEQVR4nO2cS2rcQBCGv4oEs2yBD+CjaG5mcqTcQH0UH8AgLQ0t/iy6W9KEZCYGZSJB1WJwo2/xQ1GvftjEVyx++xIOzjvv/D/lJyt2nVrsymw3P1C/t8fU7/wda4EmAWAwm6IB0MiiNSV59wPA9HJA/c7/DV+Ck0b0IxA70FDjN4f49Yl6nN+Lb7eL8GkiCOt/tMn+ix7n9+Vv/Du95ISs2DUI5haml/RMPc7vy2f/ljobPg1ocuga4QNi1wBBwPQMPc7vz8+5PYbpUupv/nmvy2hmZt2z9Di/H9+W4Mz2acTXT1OJ2rRk6qfpcX5fHmlspCEvGmkIylErSaJXykj5ejT9zj8wSSknZA2UgVdDSECQIEjSSF66f8/G1/itUZuz8kCjbAO1HHv8npFvgdkAQ7EDMbVAGLF+AANQfBVGGA+o3/kHJi2pua+VWFKixLTWJO3xez6+NE+9UnWyEsWrC7J42v17Np5SZkNiE79DkNYivOWOpt/5B1bid6wN1WY5luOGrfePpt/5B5brap6AgDIJ14JbqaWdPpp+5x9YzcBNTdJLQi7lWDmcPX5Pyddtqk2Ttd3fyEXY8/Np+TILlSFpGY2WhLx89f2r0/KN8jWra/6rVN1y/2q6iPi6OPmI+p2/Y5s2eW2yFqtJGnz+PSW/ORwqW88h/abnSvj+84l5DcxWIvn9ImI3W5mUppZ88P9MPc7vxZes3C8Bq3GdidfBuPH9yXPym1q7OWng5uChpHDvn8/Jr+8XaGRv42wQEsRu7aSXQ+AD6nf+jv36fgFCahWvLdZrznegxTTX29BH0+/8fcv3Y21xcl2CYvdBPf1vEtGadDz9zn+Vny65EttbvSmrIaSyPIF+529sM//mMXcZgvMhcFj2pH3+PSF/834ht84z9COCqU3WjzPlOcNT9Di/P7++XzAjWotZV5pofbdLHYyVDqrf+T+b+f9ncN750/I/ATs5QmnV63Q1AAAAAElFTkSuQmCC" alt="QR code linking to github.com/aljesusg/devfestValencia2026" />
+            <p class="media-caption">Scan for the repo</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <p class="eyebrow">credits</p>
+        <h2>Google Cloud AI tokens</h2>
+        <div class="split-media">
+          <div class="copy">
+            <p style="font-size:0.85em;margin:0 0 0.6em">Claim free Google Cloud credits for AI / Gemini during the workshop:</p>
+            <p class="big-link" style="word-break:break-all">
+              <a href="https://g.dev/credits/promo-916ae52ed4765f76">https://g.dev/credits/promo-916ae52ed4765f76</a>
+            </p>
+            <p class="muted" style="font-size:0.55em;margin-top:1em">Scan the QR or open the link on your phone.</p>
+          </div>
+          <div class="qr-block">
+            <img class="qr-code" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXIAAAFyAQAAAADAX2ykAAACyElEQVR4nO2cQW7jMAxFP8cCsnSAHsBHUW5W5Ei9gX2U3EBaBlDwZ0FRdrNoUDTNWANyYcTwWxD4IEVSUoT4ji1/voUDzjvv/K/yWaqdcNs+5AhgkQD7Hvbpv/MP+IEkSQADgRxUVfISIO8JQCRJplf54/yz+RqcWQTLEeA8FohMBTxPRT/I6YX+OP8sPty9EwAkXg4EsgDxEsor/XH+N/mBGr/n6SpyGknO/9Qf53/Ka/xak3QTAKEAOYDIb0XiBwCMBJBf4Y/zz+dvWh5r/MYEyHsaWBdcAFhEajm9S/+d/8K4sQQAIwmMJMkC+2U2781/5x8YmYaaniNJRBZwbh+iNk7WJLm+nfEgWWoQz2NpItfSirOGc4H2ya5vZ3zLzwWIyV5nDDWSVX2LZNe3Nx42uqqRjKjpeqjLcTThdSV2fTvjQSbogqtaruPK2BK3Iq5vh7zFbyuYNyKnBvn62zGfAxAvIiLHlppZIDK1JgkwkXfov/NfmUUtSaaBm9ZI7a6m3pv/zj8wVbWVVtoQ1Sa4jrNWzV3f3njTDfWx5uf62vrf6Pp2yFsuHllj9S5J1/itiOvbG78ZaJjSBdb6kmt37Pr2ymcRAIDIdBXOOUBOGMiz1FMb2v/6+ZweeUvIo9XPrR1edxose/v62x/flllbYdepRkzDp9GV5+cO+U2vW1ujtdxige0pFd8f7JPHWlVtiuh5rKPnurWA1kLtzX/nH9jd+Y1tJb1OPyyFu74d8uv9Bd1GuOkhaM3KyxHQk1jL5PPn/vgAYNAtBEF+I2J601ciHyH1100QP0LZn//OPzDLxXVWtdZSdf/Xymmvn7vk7/XVghk21dhcPfL197/hdTtpmWz9lan4/m/PvJ11LpD3S4Cc8qHeJIzpJuQlfOZ/2x/nn8m3+wv5oPePgPEq2g4vEoBlInn2+wsd8uL/z+C8893yfwHrXo7sRWRa/QAAAABJRU5ErkJggg==" alt="QR code for Google Cloud AI credits promo" />
+            <p class="media-caption">Scan for credits</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <p class="eyebrow">primer</p>
+        <h2>What is an LLM?</h2>
+        <div class="full-figure">
+          <img class="slide-media" src="assets/llm-what.jpg" alt="Diagram explaining what an LLM is and how it is trained" />
+        </div>
+        <p class="media-caption">Visual from the original deck — LLMs generate text; they still need live context for your data.</p>
+      </section>
+
+      <section>
+        <p class="eyebrow">history</p>
+        <h2>LLM timeline</h2>
+        <div class="full-figure">
+          <img class="slide-media" src="assets/ai.jpeg" alt="Timeline of LLM history from Transformers to agentic models" />
+        </div>
+        <p class="media-caption">From Transformers (2017) to reasoning &amp; agentic LLMs (2025–2026).</p>
+      </section>
+
+      <section>
+        <p class="eyebrow">history · agents</p>
+        <h2>Isolated models → tools</h2>
+        <div class="full-figure">
+          <img class="slide-media" src="assets/ai_2.jpeg" alt="Isolated LLMs with limited context versus agents connected to tools" />
+        </div>
+        <p class="media-caption">This is why MCP matters: models stop being closed boxes and start calling tools.</p>
+      </section>
+
+      <section>
+        <p class="eyebrow">history · cutoffs 2025–2026</p>
+        <h2>New generation cutoffs</h2>
+        <div class="full-figure">
+          <img class="slide-media" src="assets/llm-history-2.jpg" alt="Updated table of 2025–2026 model launches and knowledge cutoffs" />
+        </div>
+        <p class="media-caption">Even brand-new models freeze at a cutoff — MCP fills the gap with live data.</p>
+      </section>
+
+      <section>
+        <p class="eyebrow">the problem</p>
+        <h2>The context gap</h2>
+        <div class="split-media">
+          <ul class="problem-list" style="margin-top:0">
+            <li><strong>Hallucinations</strong> — the model guesses what it does not know about your private data.</li>
+            <li><strong>Data silos</strong> — facts live in APIs, databases, and local files the model cannot see.</li>
+            <li><strong>No live world</strong> — training cutoffs freeze knowledge in time.</li>
+          </ul>
+          <img class="slide-media" src="assets/why-mcp.jpg" alt="Static LLM versus connected LLM via MCP" />
+        </div>
+      </section>
+
+      <section>
+        <p class="eyebrow">definition</p>
+        <h2>What is MCP?</h2>
+        <div class="split-media">
+          <div class="copy">
+            <p class="usb">The USB-C of AI integrations</p>
+            <p>
+              An open standard (started by Anthropic) to connect language models with
+              tools and data — write a server once, use it from many hosts.
+            </p>
+            <p style="margin-top:0.8em"><em>Write once. Connect anywhere.</em></p>
+          </div>
+          <img class="slide-media" src="assets/usb-c.jpg" alt="USB cables as a metaphor for a universal connector" />
+        </div>
+      </section>
+
+      <section>
+        <p class="eyebrow">architecture</p>
+        <h2>Host · Client · Server</h2>
+        <div class="full-figure">
+          <img class="slide-media" src="assets/architecture.jpg" alt="MCP architecture: host application, MCP client, protocol, and MCP servers" />
+        </div>
+        <p class="media-caption">MCP separates the brain (the model) from the hands (your server).</p>
+      </section>
+
+      <section>
+        <p class="eyebrow">server primitives</p>
+        <h2>Three pillars</h2>
+        <div class="grid-3 pillars">
+          <div class="card">
+            <h3>Tools</h3>
+            <p>Executable actions the model can invoke — the fun part.</p>
+          </div>
+          <div class="card">
+            <h3>Resources</h3>
+            <p>Readable context: files, docs, schedules, logs.</p>
+          </div>
+          <div class="card">
+            <h3>Prompts</h3>
+            <p>Reusable templates that steer common tasks.</p>
+          </div>
+        </div>
+        <p class="muted" style="margin-top:1em;font-size:0.7em">Today we focus on <strong>tools</strong>.</p>
+      </section>
+
+      <section>
+        <p class="eyebrow">transports</p>
+        <h2>How they talk</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3>Standard I/O</h3>
+            <p>Local subprocess. Fast JSON-RPC over stdin/stdout. Perfect for Step 01.</p>
+          </div>
+          <div class="card">
+            <h3>Streamable HTTP</h3>
+            <p>Remote-friendly. Hosts call your <code>/mcp</code> endpoint. Step 03.</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <p class="eyebrow">stack</p>
+        <h2>Go + official SDK</h2>
+        <div class="split-media">
+          <ul>
+            <li>Library: <code>github.com/modelcontextprotocol/go-sdk</code></li>
+            <li>Same core library used by production Go MCP servers</li>
+            <li>We will <strong>not</strong> copy kubernetes-mcp-server complexity (toolsets, RBAC, OAuth, OTEL…)</li>
+            <li>Methodology only: server → tools → transport → host</li>
+          </ul>
+          <img class="slide-media" src="assets/stack-go.jpg" alt="Gopher coding illustration for the Go MCP stack" />
+        </div>
+      </section>
+
+      <section>
+        <p class="eyebrow">clients</p>
+        <h2>Compatible hosts</h2>
+        <table class="table">
+          <thead>
+            <tr><th>Client</th><th>Typical use</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Cursor / VS Code</td><td>Coding agents</td><td>Great for this workshop</td></tr>
+            <tr><td>Claude Desktop</td><td>Personal assistant</td><td>Usually stdio</td></tr>
+            <tr><td>Gemini CLI</td><td>Terminal agents</td><td>HTTP (<code>httpUrl</code>) or stdio</td></tr>
+            <tr><td>ChatGPT / others</td><td>Tool integrations</td><td>Growing support</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <p class="eyebrow">live demo</p>
+        <h2>Before we code: a finished MCP</h2>
+        <div class="split-media">
+          <div class="copy">
+            <div class="card">
+              <h3><code>demo-example/</code></h3>
+              <p>
+                One tool — <code>schedule</code> — that fetches the <strong>real</strong> DevFest Valencia agenda
+                from the public GDG Community API, then filters Friday / Saturday sessions live.
+              </p>
+            </div>
+            <div class="card" style="margin-top:0.8em">
+              <h3>Try it</h3>
+              <p><code>cd demo-example &amp;&amp; go run . -http=:8080</code></p>
+            </div>
+          </div>
+          <img class="slide-media" src="assets/live-demo.jpg" alt="Live demo host UI connected to an MCP server" />
+        </div>
+      </section>
+
+      <section>
+        <p class="eyebrow">live demo · try it</p>
+        <h2>Ask the agenda</h2>
+        <div class="split-media">
+          <div class="copy">
+            <p class="muted" style="font-size:0.58em;margin:0 0 0.45em">Example prompts (force a <code>schedule</code> tool call):</p>
+            <ul style="font-size:0.68em;margin:0">
+              <li>“What is on the DevFest schedule on Friday?”</li>
+              <li>“Find Alberto’s session with the schedule tool.”</li>
+              <li>“Any talk about MCP or agents?”</li>
+            </ul>
+            <div class="card" style="margin-top:0.55em">
+              <h3>No AI host? Use Inspector</h3>
+              <p style="font-size:0.9em">
+                <a href="https://modelcontextprotocol.io/docs/tools/inspector">MCP Inspector</a> lists tools and calls them without Cursor:
+              </p>
+              <pre style="font-size:0.55em;margin:0.4em 0 0;max-height:none"><code>cd demo-example
+npx @modelcontextprotocol/inspector go run .</code></pre>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Or over HTTP</h3>
+            <pre style="font-size:0.48em;margin:0;max-height:none"><code># terminal 1
+go run . -http=:8080
+
+# terminal 2
+npx @modelcontextprotocol/inspector \
+  --transport http \
+  --server-url http://127.0.0.1:8080/mcp</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <p class="eyebrow">live demo · tool definition</p>
+        <h2>Tool: <code>schedule</code></h2>
+        <p class="muted" style="font-size:0.65em;margin-bottom:0.5em">
+          Typed inputs → the Go SDK builds the JSON Schema the host advertises to the model.
+          Measure it: <a href="https://mcpshowcase.com/tools/mcp-token-calculator">mcpshowcase.com/tools/mcp-token-calculator</a>
+        </p>
+        <pre><code class="language-go">type ScheduleInput struct {
+  Day         string `json:"day,omitempty" jsonschema:"Friday|Saturday"`
+  Time        string `json:"time,omitempty" jsonschema:"e.g. 18:05"`
+  Person      string `json:"person,omitempty" jsonschema:"speaker substring"`
+  Description string `json:"description,omitempty" jsonschema:"match title+desc"`
+}
+
+mcp.AddTool(server, &amp;mcp.Tool{
+  Name: "schedule",
+  Description: "Fetch the live DevFest agenda and filter sessions.",
+}, handler)</code></pre>
+      </section>
+
+      <section>
+        <p class="eyebrow">live demo · token cost</p>
+        <h2>1 tool vs 2 tools</h2>
+        <div class="split-media">
+          <div class="copy">
+            <p class="muted" style="font-size:0.58em;margin:0 0 0.45em">
+              Tool definitions are resent <strong>on every turn</strong>. Estimate ≈ 3.6 chars/token
+              (<a href="https://mcpshowcase.com/tools/mcp-token-calculator">MCP Token Calculator</a>).
+            </p>
+            <table class="table" style="margin-top:0">
+              <thead>
+                <tr><th>Design</th><th>What the model sees</th><th>~Tokens / turn</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>1 tool</strong> <code>schedule</code></td>
+                  <td>day, time, person, description</td>
+                  <td><strong>~180</strong></td>
+                </tr>
+                <tr>
+                  <td><strong>2 tools</strong></td>
+                  <td><code>schedule_by_when</code> + <code>schedule_by_what</code></td>
+                  <td><strong>~210</strong></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="card" style="margin-top:0.55em">
+              <h3>Surprise</h3>
+              <p>
+                Splitting costs <strong>~17% more</strong> (~+30 tokens/turn). Each tool pays fixed overhead
+                (name + description + schema shell).
+              </p>
+            </div>
+          </div>
+          <div class="qr-block">
+            <img class="slide-media thumb-arch" src="assets/architecture.jpg" alt="MCP architecture diagram (Host, Client, Server)" />
+            <p class="media-caption">Architecture reminder</p>
+          </div>
+        </div>
+        <p class="media-caption">Per 1,000 turns: ~180k vs ~210k definition tokens (before prompts, history, and tool results).</p>
+      </section>
+
+      <section>
+        <p class="eyebrow">design · tokens</p>
+        <h2>Why token efficiency matters</h2>
+        <div class="split-media">
+          <div class="copy">
+            <p style="font-size:0.72em;margin:0 0 0.55em">
+              Every tool definition rides along <strong>on every turn</strong>. More tools → more cost,
+              less room for the real conversation.
+            </p>
+            <ul style="font-size:0.68em;margin:0">
+              <li><strong>Before adding a tool</strong> — look at the LLM context window and how the agent actually behaves.</li>
+              <li><strong>Ask when it fires</strong> — in which prompts, how often, and whether one broader tool is enough.</li>
+              <li><strong>Measure, don’t guess</strong> — count tokens, then validate behaviour with evals across models.</li>
+            </ul>
+            <div class="card" style="margin-top:0.55em">
+              <h3>Test with evals</h3>
+              <p>
+                Use <a href="https://www.mcpevals.io/">mcpevals.io</a> to score expected tool behaviour
+                (accuracy, relevance, completeness…) on different models — so a cheap design still does the right thing.
+              </p>
+            </div>
+          </div>
+          <div class="qr-block">
+            <img class="qr-code" src="assets/qr-mcpevals.png" alt="QR code linking to https://www.mcpevals.io/" />
+            <p class="media-caption"><a href="https://www.mcpevals.io/">mcpevals.io</a> — LLM scoring for MCP tools</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <p class="eyebrow">live coding</p>
+        <h2>What you will build</h2>
+        <div class="card">
+          <h3>workshop/ — step by step</h3>
+          <p>
+            A tiny server over a <strong>local snapshot</strong> of that same agenda.
+            Tools: <code>greet</code> → <code>list_sessions</code> · <code>get_session</code> · <code>find_speaker</code>.
+          </p>
+        </div>
+        <p class="muted" style="margin-top:0.8em;font-size:0.7em">
+          Same SDK as the live demo — smaller surface so everyone can finish in the session.
+          In production, prefer fewer broader tools (like <code>schedule</code>); here we split them to practice schemas.
+        </p>
+      </section>
+
+      <section class="center-slide">
+        <h2>Let’s build</h2>
+        <p class="muted">Open the repo → <code>workshop/01-hello-stdio</code></p>
+        <p class="big-link"><a href="https://github.com/aljesusg/devfestValencia2026">github.com/aljesusg/devfestValencia2026</a></p>
+      </section>
+
+      <section>
+        <p class="eyebrow">checklist</p>
+        <h2>Steps at a glance</h2>
+        <ol style="font-size:0.78em">
+          <li><code>01-hello-stdio</code> — <code>mcp.NewServer</code> + one tool + stdio</li>
+          <li><code>02-tools-schemas</code> — schedule tools with typed inputs</li>
+          <li><code>03-http-transport</code> — <code>NewStreamableHTTPHandler</code> on <code>/mcp</code></li>
+          <li><code>04-connect-cursor</code> — <code>url: http://127.0.0.1:8080/mcp</code></li>
+        </ol>
+        <p class="muted" style="font-size:0.65em">Solutions live under <code>solutions/</code> if you get stuck.</p>
+      </section>
+
+      <section>
+        <p class="eyebrow">wrap-up</p>
+        <h2>Takeaways</h2>
+        <div class="split-media">
+          <ul class="takeaways">
+            <li><strong>Standardize</strong> — stop writing one-off connectors per host.</li>
+            <li><strong>Control</strong> — you decide which tools and data are exposed.</li>
+            <li><strong>Start small</strong> — one tool on stdio beats a premature platform.</li>
+            <li><strong>Grow later</strong> — resources, prompts, auth: see <code>workshop/05-bonus-home</code>.</li>
+          </ul>
+          <img class="slide-media" src="assets/and-then.jpg" alt="What comes next after building your first MCP server" />
+        </div>
+      </section>
+
+      <section class="center-slide">
+        <h2>Questions?</h2>
+        <p class="muted">Thanks for joining DevFest Valencia</p>
+        <p class="big-link">
+          <a href="https://github.com/aljesusg/devfestValencia2026">github.com/aljesusg/devfestValencia2026</a><br />
+          @aljesusg
+        </p>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: "c/t",
+      transition: "fade",
+      backgroundTransition: "fade",
+      width: 1280,
+      height: 720,
+      margin: 0.08,
+    });
+  </script>
+</body>
+</html>
