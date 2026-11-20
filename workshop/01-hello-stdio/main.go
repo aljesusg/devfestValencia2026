@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -13,10 +14,16 @@ type GreetInput struct {
 	Name string `json:"name" jsonschema:"the person to greet"`
 }
 
-// TODO: improve the greeting message if you want — the wiring below already works
-// once you uncomment the server setup in main.
 func greet(_ context.Context, _ *mcp.CallToolRequest, input GreetInput) (*mcp.CallToolResult, any, error) {
-	msg := fmt.Sprintf("Hello, %s! Welcome to DevFest Valencia.", input.Name)
+	name := strings.Join(strings.Fields(input.Name), " ")
+	if name == "" {
+		name = "DevFest attendee"
+	}
+	// Return the Kiali-inspired graph as tool content, never directly on stdout:
+	// stdout belongs exclusively to the MCP transport.
+	msg := fmt.Sprintf("Hola, %s! Et donem la benvinguda al DevFest València!\n\n"+
+		"MCP client ──stdio──▶ devfest-mcp\n"+
+		"                      └─ greet(%q) ✓", name, name)
 	return &mcp.CallToolResult{
 		Content: []mcp.Content{
 			&mcp.TextContent{Text: msg},
@@ -25,17 +32,13 @@ func greet(_ context.Context, _ *mcp.CallToolRequest, input GreetInput) (*mcp.Ca
 }
 
 func main() {
-	// TODO(1): create the server
-	// server := mcp.NewServer(&mcp.Implementation{Name: "devfest-mcp", Version: "0.1.0"}, nil)
+	server := mcp.NewServer(&mcp.Implementation{Name: "devfest-mcp", Version: "0.1.0"}, nil)
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "greet",
+		Description: "Welcome a DevFest attendee in Valencian with a Kiali-inspired MCP call graph",
+	}, greet)
 
-	// TODO(2): register the tool
-	// mcp.AddTool(server, &mcp.Tool{Name: "greet", Description: "Greet a DevFest attendee by name"}, greet)
-
-	// TODO(3): run over stdio until the client disconnects
-	// if err := server.Run(context.Background(), &mcp.StdioTransport{}); err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	_ = greet
-	log.Fatal("TODO: uncomment the three steps in main() — see README.md")
+	if err := server.Run(context.Background(), &mcp.StdioTransport{}); err != nil {
+		log.Fatal(err)
+	}
 }
