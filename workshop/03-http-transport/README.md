@@ -16,7 +16,12 @@ This is the transport pattern used by many hosted MCP servers (and by Go example
 
 ## What you will edit
 
-Complete the `TODO` blocks in `main.go` around `mcp.NewStreamableHTTPHandler`.
+The HTTP handler is implemented in `main.go`, including `/mcp` and `/health`.
+The four agenda tools include Step 02's bonus `schedule_stats`.
+
+For all four steps in one Inspector, run `python3 workshop/launch_inspector.py` from the
+repository root. See [the guided walkthrough](../INSPECTOR.md) for inputs,
+expected results, ports, and client configuration.
 
 ## Run
 

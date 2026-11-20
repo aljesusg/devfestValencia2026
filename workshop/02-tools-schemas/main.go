@@ -25,18 +25,12 @@ func main() {
 		Version: "0.2.0",
 	}, nil)
 
-	// TODO: register the three tools (handlers are in tools.go)
-	// mcp.AddTool(server, &mcp.Tool{Name: "list_sessions", Description: "List DevFest sessions, optionally filtered by day (Friday/Saturday)"}, makeListSessions(schedule))
-	// mcp.AddTool(server, &mcp.Tool{Name: "get_session", Description: "Get a single session by id (e.g. s1)"}, makeGetSession(schedule))
-	// mcp.AddTool(server, &mcp.Tool{Name: "find_speaker", Description: "Find sessions by speaker name (substring match)"}, makeFindSpeaker(schedule))
+	mcp.AddTool(server, &mcp.Tool{Name: "list_sessions", Description: "List DevFest sessions, optionally filtered by day (Friday/Saturday or the local day name) and track"}, makeListSessions(schedule))
+	mcp.AddTool(server, &mcp.Tool{Name: "get_session", Description: "Get a single DevFest session by its exact id; use list_sessions to discover ids"}, makeGetSession(schedule))
+	mcp.AddTool(server, &mcp.Tool{Name: "find_speaker", Description: "Find DevFest sessions by speaker name (case-insensitive substring match)"}, makeFindSpeaker(schedule))
+	mcp.AddTool(server, &mcp.Tool{Name: "schedule_stats", Description: "Explore the local agenda: session counts by day, track, speaker label and start time, plus missing metadata counts. Includes non-talk agenda entries; speaker labels are not individual people. Optional day/track filters."}, makeScheduleStats(schedule))
 
-	_ = schedule
-	_ = server
-	_ = context.Background
-
-	log.Fatal("TODO: register tools in main.go, implement handlers in tools.go, then run over stdio")
-
-	// if err := server.Run(context.Background(), &mcp.StdioTransport{}); err != nil {
-	// 	log.Fatal(err)
-	// }
+	if err := server.Run(context.Background(), &mcp.StdioTransport{}); err != nil {
+		log.Fatal(err)
+	}
 }

@@ -40,7 +40,7 @@ func LoadSchedule(path string) (*Schedule, error) {
 }
 
 func (s *Schedule) Filter(day, track string) []Session {
-	var out []Session
+	out := make([]Session, 0)
 	for _, sess := range s.Sessions {
 		if day != "" && !strings.EqualFold(sess.Day, day) && !strings.EqualFold(sess.DayLocal, day) {
 			continue
@@ -64,7 +64,7 @@ func (s *Schedule) ByID(id string) (Session, error) {
 
 func (s *Schedule) BySpeaker(name string) []Session {
 	needle := strings.ToLower(strings.TrimSpace(name))
-	var out []Session
+	out := make([]Session, 0)
 	for _, sess := range s.Sessions {
 		if strings.Contains(strings.ToLower(sess.Speaker), needle) {
 			out = append(out, sess)

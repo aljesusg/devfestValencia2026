@@ -1,5 +1,14 @@
 # Step 04 — Connect Cursor
 
+## Completed workshop launcher
+
+Run `python3 workshop/launch_inspector.py` from the repository root to see all four steps
+as named Inspector entries. Follow [the guided walkthrough](../INSPECTOR.md#04--connect-a-client--guided-investigation)
+for the exact tool fields, Cursor configuration, and suggested AI prompts.
+The launcher uses **8093**; the manual instructions below use **8080**.
+The adjacent `mcp.json.example` matches the launcher. Step 04 reuses Step 03's
+server: it is a client-integration exercise, not another server implementation.
+
 **Timebox:** ~7 minutes
 
 ## Goal

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -33,27 +34,30 @@ func textResult(v any) (*mcp.CallToolResult, any, error) {
 
 func makeListSessions(schedule *Schedule) func(context.Context, *mcp.CallToolRequest, ListSessionsInput) (*mcp.CallToolResult, any, error) {
 	return func(_ context.Context, _ *mcp.CallToolRequest, in ListSessionsInput) (*mcp.CallToolResult, any, error) {
-		// TODO: return schedule.Filter(in.Day, in.Track) via textResult
-		_ = in
-		_ = schedule
-		return nil, nil, fmt.Errorf("TODO: implement list_sessions")
+		return textResult(schedule.Filter(strings.TrimSpace(in.Day), strings.TrimSpace(in.Track)))
 	}
 }
 
 func makeGetSession(schedule *Schedule) func(context.Context, *mcp.CallToolRequest, GetSessionInput) (*mcp.CallToolResult, any, error) {
 	return func(_ context.Context, _ *mcp.CallToolRequest, in GetSessionInput) (*mcp.CallToolResult, any, error) {
-		// TODO: schedule.ByID(in.ID) then textResult
-		_ = in
-		_ = schedule
-		return nil, nil, fmt.Errorf("TODO: implement get_session")
+		id := strings.TrimSpace(in.ID)
+		if id == "" {
+			return nil, nil, fmt.Errorf("id must not be blank; use list_sessions to discover session ids")
+		}
+		session, err := schedule.ByID(id)
+		if err != nil {
+			return nil, nil, err
+		}
+		return textResult(session)
 	}
 }
 
 func makeFindSpeaker(schedule *Schedule) func(context.Context, *mcp.CallToolRequest, FindSpeakerInput) (*mcp.CallToolResult, any, error) {
 	return func(_ context.Context, _ *mcp.CallToolRequest, in FindSpeakerInput) (*mcp.CallToolResult, any, error) {
-		// TODO: schedule.BySpeaker(in.Name) then textResult
-		_ = in
-		_ = schedule
-		return nil, nil, fmt.Errorf("TODO: implement find_speaker")
+		name := strings.TrimSpace(in.Name)
+		if name == "" {
+			return nil, nil, fmt.Errorf("name must not be blank; use list_sessions to browse all sessions")
+		}
+		return textResult(schedule.BySpeaker(name))
 	}
 }

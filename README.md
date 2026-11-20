@@ -41,6 +41,11 @@ Optional for Step 03+: a free terminal port (default `8080`).
 
 ## Quick start
 
+**Completed steps 01–04:** run `python3 workshop/launch_inspector.py` from this repository
+root to inspect each step as a separate named server entry. See the
+[Inspector walkthrough](workshop/INSPECTOR.md) for descriptions, exact field
+values, example tool calls, and Cursor prompts.
+
 ```bash
 git clone https://github.com/aljesusg/devfestValencia2026.git
 cd devfestValencia2026
